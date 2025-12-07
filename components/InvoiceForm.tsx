@@ -46,9 +46,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ initialInvoice, onSave, onCan
   
   const calculateTotals = useCallback(() => {
     const subtotal = invoice.items.reduce((acc, item) => acc + item.quantity * item.price, 0);
-    const taxAmount = (subtotal - invoice.discount) * (invoice.taxRate / 100);
-    const total = subtotal - invoice.discount + taxAmount;
-    return { subtotal, taxAmount, total };
+    const totalItemDiscount = invoice.items.reduce((acc, item) => acc + (item.discount || 0), 0);
+    const baseForTax = subtotal - totalItemDiscount - invoice.discount;
+    const taxAmount = baseForTax > 0 ? baseForTax * (invoice.taxRate / 100) : 0;
+    const total = baseForTax + taxAmount;
+    return { subtotal, taxAmount, total, totalItemDiscount };
   }, [invoice.items, invoice.discount, invoice.taxRate]);
 
 
@@ -61,6 +63,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ initialInvoice, onSave, onCan
         unit: product.unit,
         price: product.price,
         quantity: 1,
+        description: '',
+        discount: 0,
       };
       setInvoice(prev => ({ ...prev, items: [...prev.items, newItem] }));
     }
@@ -114,7 +118,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ initialInvoice, onSave, onCan
       onSave(finalInvoice);
   };
   
-  const { subtotal, taxAmount, total } = calculateTotals();
+  const { subtotal, taxAmount, total, totalItemDiscount } = calculateTotals();
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-20">
@@ -165,33 +169,44 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ initialInvoice, onSave, onCan
           <table className="w-full text-right text-sm">
             <thead className="bg-slate-100 text-slate-700 font-medium">
               <tr>
-                <th className="p-3 w-12 text-center">#</th>
+                <th className="p-3 w-10 text-center">#</th>
                 <th className="p-3">شرح کالا/خدمت</th>
-                <th className="p-3 w-24">تعداد</th>
-                <th className="p-3 w-24">واحد</th>
-                <th className="p-3 w-32">مبلغ واحد</th>
+                <th className="p-3 w-20">تعداد</th>
+                <th className="p-3 w-20">واحد</th>
+                <th className="p-3 w-28">مبلغ واحد</th>
+                <th className="p-3 w-28">تخفیف</th>
                 <th className="p-3 w-32">مبلغ کل</th>
-                <th className="p-3 w-16"></th>
+                <th className="p-3 w-14"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {invoice.items.length === 0 ? (
-                  <tr><td colSpan={7} className="text-center p-8 text-slate-400">هیچ آیتمی به فاکتور اضافه نشده است.</td></tr>
+                  <tr><td colSpan={8} className="text-center p-8 text-slate-400">هیچ آیتمی به فاکتور اضافه نشده است.</td></tr>
               ) : (
                 invoice.items.map((item, index) => (
-                    <tr key={index} className="hover:bg-slate-50">
-                    <td className="p-3 text-center text-slate-500">{index + 1}</td>
-                    <td className="p-3 font-medium text-slate-800">{item.name}</td>
-                    <td className="p-3"><input type="number" value={item.quantity} onChange={e => handleItemChange(index, 'quantity', e.target.valueAsNumber)} className="w-full p-1.5 bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-center" min="1" /></td>
-                    <td className="p-3"><input value={item.unit} onChange={e => handleItemChange(index, 'unit', e.target.value)} className="w-full p-1.5 bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-center" /></td>
-                    <td className="p-3"><input type="number" value={item.price} onChange={e => handleItemChange(index, 'price', e.target.valueAsNumber)} className="w-full p-1.5 bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-left dir-ltr" /></td>
-                    <td className="p-3 font-mono">{(item.quantity * item.price).toLocaleString('fa-IR')}</td>
-                    <td className="p-3 text-center">
-                        <button onClick={() => handleRemoveItem(index)} className="text-red-500 hover:text-red-700 transition-colors" title="حذف">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
-                    </td>
+                    <React.Fragment key={index}>
+                    <tr className="hover:bg-slate-50/70">
+                        <td className="p-2 align-top text-center text-slate-500">{index + 1}</td>
+                        <td className="p-2 align-top font-medium text-slate-800">{item.name}</td>
+                        <td className="p-2 align-top"><input type="number" value={item.quantity} onChange={e => handleItemChange(index, 'quantity', e.target.valueAsNumber)} className="w-full p-1.5 bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-center" min="1" /></td>
+                        <td className="p-2 align-top"><input value={item.unit} onChange={e => handleItemChange(index, 'unit', e.target.value)} className="w-full p-1.5 bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-center" /></td>
+                        <td className="p-2 align-top"><input type="number" value={item.price} onChange={e => handleItemChange(index, 'price', e.target.valueAsNumber)} className="w-full p-1.5 bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-left dir-ltr" /></td>
+                        <td className="p-2 align-top"><input type="number" value={item.discount || 0} onChange={e => handleItemChange(index, 'discount', e.target.valueAsNumber)} className="w-full p-1.5 bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-left dir-ltr" /></td>
+                        <td className="p-2 align-top font-mono font-semibold">{((item.quantity * item.price) - (item.discount || 0)).toLocaleString('fa-IR')}</td>
+                        <td className="p-2 align-top text-center">
+                            <button onClick={() => handleRemoveItem(index)} className="text-red-500 hover:text-red-700 transition-colors" title="حذف">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                        </td>
                     </tr>
+                    <tr className="hover:bg-slate-50/70">
+                        <td></td>
+                        <td colSpan={6} className="pb-2 px-2">
+                             <input type="text" value={item.description || ''} onChange={e => handleItemChange(index, 'description', e.target.value)} placeholder="توضیحات این قلم (اختیاری)" className="w-full p-1.5 text-xs bg-slate-50 border border-slate-200 rounded focus:ring-1 focus:ring-blue-500" />
+                        </td>
+                        <td></td>
+                    </tr>
+                    </React.Fragment>
                 ))
               )}
             </tbody>
@@ -227,13 +242,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ initialInvoice, onSave, onCan
 
         <div className="p-6 bg-slate-50 rounded-xl shadow-sm border border-slate-200 h-fit">
              <h3 className="text-lg font-bold text-slate-800 mb-6 border-b pb-2">محاسبات مالی</h3>
-             <div className="space-y-4">
+             <div className="space-y-4 text-sm">
                 <div className="flex justify-between items-center text-slate-600">
                     <span>جمع کل اقلام:</span> 
                     <span className="font-mono font-medium">{subtotal.toLocaleString('fa-IR')} <span className="text-xs">ریال</span></span>
                 </div>
+                 <div className="flex justify-between items-center text-slate-600">
+                    <span>تخفیف اقلام:</span> 
+                    <span className="font-mono font-medium text-red-600">{totalItemDiscount.toLocaleString('fa-IR')} <span className="text-xs">ریال</span></span>
+                </div>
                 <div className="flex justify-between items-center text-slate-600">
-                    <span className="flex items-center gap-1">تخفیف:</span> 
+                    <span className="flex items-center gap-1">تخفیف کلی:</span> 
                     <div className="flex items-center gap-2">
                         <input type="number" name="discount" value={invoice.discount} onChange={handleInputChange} className="w-24 p-1.5 text-sm bg-white border border-slate-300 rounded text-left focus:ring-1 focus:ring-blue-500" />
                         <span className="text-xs">ریال</span>

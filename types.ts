@@ -38,6 +38,8 @@ export interface InvoiceItem {
   unit: string;
   quantity: number;
   price: number;
+  description?: string;
+  discount?: number;
 }
 
 export enum InvoiceType {

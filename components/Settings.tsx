@@ -16,11 +16,13 @@ const emptyBankAccount: Omit<BankAccount, 'id'> = {
 const Settings: React.FC = () => {
   const [seller, setSeller] = useLocalStorage<Party>('seller', emptyParty);
   const [bankAccounts, setBankAccounts] = useLocalStorage<BankAccount[]>('bankAccounts', []);
+  const [invoiceHeader, setInvoiceHeader] = useLocalStorage<string>('invoiceHeader', '');
+  const [invoiceFooter, setInvoiceFooter] = useLocalStorage<string>('invoiceFooter', '');
   const [currentBankAccount, setCurrentBankAccount] = useState<Omit<BankAccount, 'id'>>(emptyBankAccount);
   const [editingBankAccountId, setEditingBankAccountId] = useState<string | null>(null);
 
-  const handleSaveSeller = () => {
-    alert('اطلاعات فروشنده با موفقیت ذخیره شد.');
+  const handleSaveSettings = () => {
+    alert('تغییرات با موفقیت ذخیره شد.');
   };
 
   const handleBankAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,11 +58,30 @@ const Settings: React.FC = () => {
     <div className="space-y-8 max-w-5xl mx-auto">
       <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
         <PartyForm party={seller} setParty={setSeller} title="اطلاعات فروشنده (من)" />
-         <div className="flex justify-end mt-6 pt-4 border-t border-slate-100">
-             <button onClick={handleSaveSeller} className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition-all">
-                ذخیره تغییرات
-             </button>
-         </div>
+      </div>
+
+      <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+        <h2 className="text-lg font-bold text-slate-800 mb-6 pb-4 border-b border-slate-100">تنظیمات چاپ فاکتور</h2>
+        <div>
+          <label htmlFor="invoiceHeader" className="block text-sm font-medium text-slate-700 mb-1.5">سربرگ فاکتور</label>
+          <textarea 
+            id="invoiceHeader"
+            value={invoiceHeader}
+            onChange={(e) => setInvoiceHeader(e.target.value)}
+            className="w-full p-2.5 bg-white border border-slate-300 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            placeholder="متنی که در بالای تمام فاکتورها نمایش داده می‌شود (مثلا: شرایط و ضوابط)"
+          />
+        </div>
+        <div className="mt-4">
+          <label htmlFor="invoiceFooter" className="block text-sm font-medium text-slate-700 mb-1.5">پاورقی فاکتور</label>
+           <textarea 
+            id="invoiceFooter"
+            value={invoiceFooter}
+            onChange={(e) => setInvoiceFooter(e.target.value)}
+            className="w-full p-2.5 bg-white border border-slate-300 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            placeholder="متنی که در پایین تمام فاکتورها نمایش داده می‌شود (مثلا: از خرید شما متشکریم)"
+          />
+        </div>
       </div>
 
       <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
@@ -93,6 +114,11 @@ const Settings: React.FC = () => {
             ))}
         </div>
       </div>
+      <div className="flex justify-end mt-6 pt-4 border-t border-slate-100">
+         <button onClick={handleSaveSettings} className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition-all">
+            ذخیره تمام تغییرات
+         </button>
+     </div>
     </div>
   );
 };
