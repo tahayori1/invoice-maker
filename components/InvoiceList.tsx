@@ -61,7 +61,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ invoices, setInvoices, onEdit
           <tbody className="divide-y divide-slate-100">
             {sortedInvoices.map((invoice) => (
               <tr key={invoice.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 font-mono font-medium text-slate-900">{invoice.invoiceNumber}</td>
+                <td className="px-6 py-4 font-medium text-slate-900">{invoice.invoiceNumber}</td>
                 <td className="px-6 py-4">
                   <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${
                     invoice.type === InvoiceType.INVOICE 
@@ -72,8 +72,8 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ invoices, setInvoices, onEdit
                   </span>
                 </td>
                 <td className="px-6 py-4 font-medium">{invoice.buyer.fullName || invoice.buyer.companyName}</td>
-                <td className="px-6 py-4 font-mono">{new Date(invoice.date).toLocaleDateString('fa-IR')}</td>
-                <td className="px-6 py-4 font-mono font-bold text-slate-800">{invoice.total.toLocaleString('fa-IR')}</td>
+                <td className="px-6 py-4">{new Date(invoice.date).toLocaleDateString('fa-IR')}</td>
+                <td className="px-6 py-4 font-bold text-slate-800">{invoice.total.toLocaleString('fa-IR')}</td>
                 <td className="px-6 py-4">
                     <div className="flex justify-center items-center gap-3">
                         <button onClick={() => setViewingInvoice(invoice)} className="text-slate-500 hover:text-blue-600 transition-colors font-medium text-xs" title="مشاهده">مشاهده</button>

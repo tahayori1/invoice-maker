@@ -104,7 +104,7 @@ const Settings: React.FC = () => {
                 <div key={acc.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-300 transition-colors">
                     <div className="mb-2 sm:mb-0">
                         <p className="font-bold text-slate-800">{acc.bankName}</p>
-                        <p className="text-sm text-slate-600 mt-1 font-mono">{acc.accountNumber}</p>
+                        <p className="text-sm text-slate-600 mt-1">{acc.accountNumber}</p>
                     </div>
                     <div className="flex gap-3 w-full sm:w-auto mt-2 sm:mt-0">
                         <button onClick={() => handleEditBankAccount(acc)} className="flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">ویرایش</button>

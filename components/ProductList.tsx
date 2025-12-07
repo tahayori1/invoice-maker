@@ -100,7 +100,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, setProducts }) => {
                   {product.name}
                 </th>
                 <td className="px-6 py-4 text-slate-500">{product.unit}</td>
-                <td className="px-6 py-4 font-mono font-medium">{product.price.toLocaleString('fa-IR')}</td>
+                <td className="px-6 py-4 font-medium">{product.price.toLocaleString('fa-IR')}</td>
                 <td className="px-6 py-4 flex justify-center gap-2">
                   <button onClick={() => handleEdit(product)} className="text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-md transition-colors font-medium">ویرایش</button>
                   <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-md transition-colors font-medium">حذف</button>

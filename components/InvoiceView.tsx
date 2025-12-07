@@ -54,7 +54,8 @@ const InvoiceView: React.FC<InvoiceViewProps> = ({ invoice, onBack }) => {
         htmlToImage.toPng(node, { 
             quality: 0.98,
             pixelRatio: 2,
-            backgroundColor: '#ffffff' 
+            backgroundColor: '#ffffff',
+            cacheBust: true,
         })
           .then((dataUrl: string) => {
             const link = document.createElement('a');
@@ -104,7 +105,7 @@ const InvoiceView: React.FC<InvoiceViewProps> = ({ invoice, onBack }) => {
                         <h1 className="text-2xl font-black text-gray-900 mb-1">{invoice.type === InvoiceType.INVOICE ? 'فاکتور فروش کالا و خدمات' : 'پیش فاکتور'}</h1>
                     </div>
                     <div className="text-left text-xs space-y-1">
-                        <p className="font-mono text-sm font-bold text-gray-800">شماره: {invoice.invoiceNumber}</p>
+                        <p className="text-sm font-bold text-gray-800">شماره: {invoice.invoiceNumber}</p>
                         <p className="text-gray-600">تاریخ: {new Date(invoice.date).toLocaleDateString('fa-IR')}</p>
                         {invoice.proformaId && <p className="text-xs text-gray-500">عطف به پ.ف: {invoices.find(i => i.id === invoice.proformaId)?.invoiceNumber}</p>}
                     </div>
@@ -133,16 +134,16 @@ const InvoiceView: React.FC<InvoiceViewProps> = ({ invoice, onBack }) => {
                         <tbody className="border border-gray-200">
                             {invoice.items.map((item, index) => (
                                 <tr key={index} className="even:bg-gray-50 hover:bg-gray-100 transition-colors print:hover:bg-transparent border-b border-gray-200 last:border-b-0">
-                                    <td className="p-2 border-l border-gray-200 text-center font-mono text-gray-500 align-top">{index + 1}</td>
+                                    <td className="p-2 border-l border-gray-200 text-center text-gray-500 align-top">{index + 1}</td>
                                     <td className="p-2 border-l border-gray-200 font-medium text-gray-900 align-top">
                                         {item.name}
                                         {item.description && <p className="text-xs font-normal text-gray-500 mt-1">{item.description}</p>}
                                     </td>
-                                    <td className="p-2 border-l border-gray-200 text-center font-mono align-top">{item.quantity}</td>
+                                    <td className="p-2 border-l border-gray-200 text-center align-top">{item.quantity}</td>
                                     <td className="p-2 border-l border-gray-200 text-center align-top">{item.unit}</td>
-                                    <td className="p-2 border-l border-gray-200 font-mono text-right align-top">{item.price.toLocaleString('fa-IR')}</td>
-                                    <td className="p-2 border-l border-gray-200 font-mono text-right align-top text-red-600">{(item.discount || 0).toLocaleString('fa-IR')}</td>
-                                    <td className="p-2 font-mono font-bold text-gray-800 text-right align-top">{((item.quantity * item.price) - (item.discount || 0)).toLocaleString('fa-IR')}</td>
+                                    <td className="p-2 border-l border-gray-200 text-right align-top">{item.price.toLocaleString('fa-IR')}</td>
+                                    <td className="p-2 border-l border-gray-200 text-right align-top text-red-600">{(item.discount || 0).toLocaleString('fa-IR')}</td>
+                                    <td className="p-2 font-bold text-gray-800 text-right align-top">{((item.quantity * item.price) - (item.discount || 0)).toLocaleString('fa-IR')}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -157,9 +158,9 @@ const InvoiceView: React.FC<InvoiceViewProps> = ({ invoice, onBack }) => {
                                 <h4 className="font-bold text-gray-800 mb-2 border-b border-gray-200 pb-1 text-sm">اطلاعات حساب بانکی</h4>
                                 <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-600">
                                     <p>بانک: <span className="font-semibold text-gray-900">{invoice.bankAccount.bankName}</span></p>
-                                    <p>شماره کارت: <span className="font-mono text-gray-900">{invoice.bankAccount.cardNumber}</span></p>
-                                    <p className="col-span-2">شماره حساب: <span className="font-mono text-gray-900">{invoice.bankAccount.accountNumber}</span></p>
-                                    <p className="col-span-2">شبا: <span className="font-mono text-gray-900">IR{invoice.bankAccount.iban}</span></p>
+                                    <p>شماره کارت: <span className="text-gray-900">{invoice.bankAccount.cardNumber}</span></p>
+                                    <p className="col-span-2">شماره حساب: <span className="text-gray-900">{invoice.bankAccount.accountNumber}</span></p>
+                                    <p className="col-span-2">شبا: <span className="text-gray-900">IR{invoice.bankAccount.iban}</span></p>
                                 </div>
                             </div>
                         )}
@@ -174,11 +175,11 @@ const InvoiceView: React.FC<InvoiceViewProps> = ({ invoice, onBack }) => {
                     <div className="w-full md:w-2/5 flex-shrink-0">
                         <table className="w-full text-xs border border-gray-300 rounded-lg overflow-hidden">
                             <tbody>
-                                <tr className="bg-gray-50 border-b border-gray-300"><td className="p-2 font-bold text-gray-700">جمع کل:</td><td className="p-2 text-left font-mono font-bold text-gray-900">{invoice.subtotal.toLocaleString('fa-IR')} <span className="text-2xs font-normal">ریال</span></td></tr>
-                                { (totalItemDiscount > 0) && <tr className="border-b border-gray-300"><td className="p-2 text-gray-600">تخفیف اقلام:</td><td className="p-2 text-left font-mono text-red-600">{totalItemDiscount.toLocaleString('fa-IR')} <span className="text-2xs font-normal">ریال</span></td></tr> }
-                                { (invoice.discount > 0) && <tr className="border-b border-gray-300"><td className="p-2 text-gray-600">تخفیف کلی:</td><td className="p-2 text-left font-mono text-red-600">{invoice.discount.toLocaleString('fa-IR')} <span className="text-2xs font-normal">ریال</span></td></tr> }
-                                <tr className="border-b border-gray-300"><td className="p-2 text-gray-600">مالیات ({invoice.taxRate}%):</td><td className="p-2 text-left font-mono text-gray-900">{invoice.taxAmount.toLocaleString('fa-IR')} <span className="text-2xs font-normal">ریال</span></td></tr>
-                                <tr className="bg-gray-800 text-white font-bold text-base"><td className="p-3">مبلغ قابل پرداخت:</td><td className="p-3 text-left font-mono">{invoice.total.toLocaleString('fa-IR')} <span className="text-sm font-normal opacity-80">ریال</span></td></tr>
+                                <tr className="bg-gray-50 border-b border-gray-300"><td className="p-2 font-bold text-gray-700">جمع کل:</td><td className="p-2 text-left font-bold text-gray-900">{invoice.subtotal.toLocaleString('fa-IR')} <span className="text-2xs font-normal">ریال</span></td></tr>
+                                { (totalItemDiscount > 0) && <tr className="border-b border-gray-300"><td className="p-2 text-gray-600">تخفیف اقلام:</td><td className="p-2 text-left text-red-600">{totalItemDiscount.toLocaleString('fa-IR')} <span className="text-2xs font-normal">ریال</span></td></tr> }
+                                { (invoice.discount > 0) && <tr className="border-b border-gray-300"><td className="p-2 text-gray-600">تخفیف کلی:</td><td className="p-2 text-left text-red-600">{invoice.discount.toLocaleString('fa-IR')} <span className="text-2xs font-normal">ریال</span></td></tr> }
+                                <tr className="border-b border-gray-300"><td className="p-2 text-gray-600">مالیات ({invoice.taxRate}%):</td><td className="p-2 text-left text-gray-900">{invoice.taxAmount.toLocaleString('fa-IR')} <span className="text-2xs font-normal">ریال</span></td></tr>
+                                <tr className="bg-gray-800 text-white font-bold text-base"><td className="p-3">مبلغ قابل پرداخت:</td><td className="p-3 text-left">{invoice.total.toLocaleString('fa-IR')} <span className="text-sm font-normal opacity-80">ریال</span></td></tr>
                             </tbody>
                         </table>
                     </div>

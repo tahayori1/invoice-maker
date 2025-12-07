@@ -96,10 +96,10 @@ const CustomerList: React.FC<CustomerListProps> = ({ customers, setCustomers }) 
                             {customer.type === PartyType.NATURAL ? 'حقیقی' : 'حقوقی'}
                         </span>
                     </td>
-                    <td className="px-6 py-4 font-mono">
+                    <td className="px-6 py-4">
                          {customer.type === PartyType.NATURAL ? customer.nationalId : customer.companyId}
                     </td>
-                    <td className="px-6 py-4 font-mono">
+                    <td className="px-6 py-4">
                          {customer.type === PartyType.NATURAL ? customer.mobile : customer.phone}
                     </td>
                     <td className="px-6 py-4">
