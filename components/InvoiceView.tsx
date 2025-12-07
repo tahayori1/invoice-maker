@@ -12,26 +12,27 @@ interface InvoiceViewProps {
 }
 
 const PartyInfo: React.FC<{ title: string; party: Invoice['seller'] }> = ({ title, party }) => (
-    <div className="border border-gray-200 rounded-lg p-3 bg-gray-50/50">
-        <h3 className="font-bold text-gray-800 mb-2 border-b border-gray-200 pb-1.5 text-base">{title}</h3>
-        <div className="space-y-1 leading-relaxed text-xs">
+    <div className="border border-gray-200 rounded-lg p-2 bg-gray-50/50">
+        <h3 className="font-bold text-gray-800 mb-2 border-b border-gray-200 pb-1 text-sm">{title}</h3>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
             {party.type === PartyType.LEGAL ? (
                 <>
-                    <p><span className="font-medium text-gray-600">نام شرکت:</span> {party.companyName}</p>
+                    <p className="col-span-2"><span className="font-medium text-gray-600">نام شرکت:</span> {party.companyName}</p>
                     <p><span className="font-medium text-gray-600">شناسه ملی:</span> {party.companyId}</p>
                     <p><span className="font-medium text-gray-600">شماره ثبت:</span> {party.registrationNumber}</p>
+                    <p><span className="font-medium text-gray-600">کد اقتصادی:</span> {party.economicCode}</p>
                     <p><span className="font-medium text-gray-600">شماره تماس:</span> {party.phone}</p>
                 </>
             ) : (
                 <>
-                    <p><span className="font-medium text-gray-600">نام:</span> {party.fullName}</p>
+                    <p className="col-span-2"><span className="font-medium text-gray-600">نام:</span> {party.fullName}</p>
                     <p><span className="font-medium text-gray-600">کد ملی:</span> {party.nationalId}</p>
+                    <p><span className="font-medium text-gray-600">کد اقتصادی:</span> {party.economicCode}</p>
                     <p><span className="font-medium text-gray-600">شماره همراه:</span> {party.mobile}</p>
                 </>
             )}
-            <p><span className="font-medium text-gray-600">شماره اقتصادی:</span> {party.economicCode}</p>
             <p><span className="font-medium text-gray-600">کد پستی:</span> {party.postalCode}</p>
-            <p><span className="font-medium text-gray-600">آدرس:</span> {party.province}، {party.city}، {party.address}</p>
+            <p className="col-span-2"><span className="font-medium text-gray-600">آدرس:</span> {`${party.province}، ${party.city}، ${party.address}`}</p>
         </div>
     </div>
 );
