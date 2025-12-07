@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { Party, PartyType, BankAccount } from '../types';
 import PartyForm from './PartyForm';
@@ -20,6 +20,7 @@ const Settings: React.FC = () => {
   const [invoiceFooter, setInvoiceFooter] = useLocalStorage<string>('invoiceFooter', '');
   const [currentBankAccount, setCurrentBankAccount] = useState<Omit<BankAccount, 'id'>>(emptyBankAccount);
   const [editingBankAccountId, setEditingBankAccountId] = useState<string | null>(null);
+  const restoreInputRef = useRef<HTMLInputElement>(null);
 
   const handleSaveSettings = () => {
     alert('تغییرات با موفقیت ذخیره شد.');
@@ -53,6 +54,81 @@ const Settings: React.FC = () => {
         setBankAccounts(bankAccounts.filter(acc => acc.id !== id));
     }
   };
+
+  const handleBackup = () => {
+    try {
+        const backupData = {
+            invoices: JSON.parse(localStorage.getItem('invoices') || '[]'),
+            products: JSON.parse(localStorage.getItem('products') || '[]'),
+            customers: JSON.parse(localStorage.getItem('customers') || '[]'),
+            seller: JSON.parse(localStorage.getItem('seller') || '{}'),
+            bankAccounts: JSON.parse(localStorage.getItem('bankAccounts') || '[]'),
+            invoiceHeader: JSON.parse(localStorage.getItem('invoiceHeader') || '""'),
+            invoiceFooter: JSON.parse(localStorage.getItem('invoiceFooter') || '""'),
+        };
+
+        const jsonString = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const today = new Date().toISOString().slice(0, 10);
+        link.href = url;
+        link.download = `invoice-maker-backup-${today}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error creating backup:', error);
+        alert('خطا در ایجاد فایل پشتیبان.');
+    }
+  };
+
+  const handleRestoreClick = () => {
+    restoreInputRef.current?.click();
+  };
+
+  const handleRestore = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const text = e.target?.result;
+            if (typeof text !== 'string') {
+                throw new Error("File content is not a string");
+            }
+            const data = JSON.parse(text);
+
+            const requiredKeys = ['invoices', 'products', 'customers', 'seller'];
+            const hasRequiredKeys = requiredKeys.every(key => key in data);
+
+            if (!hasRequiredKeys) {
+                alert('فایل پشتیبان نامعتبر است یا فرمت صحیحی ندارد.');
+                return;
+            }
+
+            if (window.confirm('توجه: بازیابی اطلاعات باعث حذف تمام اطلاعات فعلی شما (فاکتورها، مشتریان، محصولات و تنظیمات) خواهد شد. آیا مطمئن هستید؟')) {
+                Object.keys(data).forEach(key => {
+                    localStorage.setItem(key, JSON.stringify(data[key]));
+                });
+                alert('اطلاعات با موفقیت بازیابی شد. صفحه مجدداً بارگذاری می‌شود.');
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error('Error restoring from backup:', error);
+            alert('خطا در خواندن فایل پشتیبان. لطفاً از معتبر بودن فایل اطمینان حاصل کنید.');
+        } finally {
+            // Reset file input value to allow selecting the same file again
+            if (restoreInputRef.current) {
+                restoreInputRef.current.value = '';
+            }
+        }
+    };
+    reader.readAsText(file);
+  };
+
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
@@ -114,6 +190,21 @@ const Settings: React.FC = () => {
             ))}
         </div>
       </div>
+       
+      <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+        <h2 className="text-lg font-bold text-slate-800 mb-6 pb-4 border-b border-slate-100">پشتیبان‌گیری و بازیابی اطلاعات</h2>
+        <p className="text-sm text-slate-600 mb-6">شما می‌توانید از تمام اطلاعات خود (فاکتورها، مشتریان، محصولات و تنظیمات) یک فایل پشتیبان تهیه کنید یا اطلاعات خود را از یک فایل پشتیبان بازیابی نمایید. تمام اطلاعات در مرورگر شما ذخیره می‌شود و ما به آن دسترسی نداریم.</p>
+        <div className="flex flex-col sm:flex-row gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <button onClick={handleBackup} className="w-full sm:w-auto flex-1 px-6 py-3 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 focus:ring-4 focus:ring-green-100 transition-all">
+                دریافت فایل پشتیبان (JSON)
+            </button>
+            <button onClick={handleRestoreClick} className="w-full sm:w-auto flex-1 px-6 py-3 bg-red-600 text-white font-medium rounded-lg shadow-sm hover:bg-red-700 focus:ring-4 focus:ring-red-100 transition-all">
+                بازیابی اطلاعات از فایل
+            </button>
+            <input type="file" ref={restoreInputRef} onChange={handleRestore} accept=".json" className="hidden" />
+        </div>
+      </div>
+
       <div className="flex justify-end mt-6 pt-4 border-t border-slate-100">
          <button onClick={handleSaveSettings} className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition-all">
             ذخیره تمام تغییرات
